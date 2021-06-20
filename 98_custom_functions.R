@@ -10,15 +10,16 @@ FitFlextableToPage <- function(ft, pgwidth = 6){
 }
 
 
-# Outputes descriptive table using gtsummary and flextable ----------------
-# takes data, selected vars, data frame of labels (with "name" and "label" vars) and optionaly grouping variable
+# Outputs descriptive table using gtsummary and flextable ----------------
+# takes data, selected vars, data frame of labels (with "name" and "label" vars) and optionally grouping variable
 
 desc_table <- function(data, vars, var_labs_df, groupby = NULL) {
+
   data <- data %>% select({{ vars }})
 
-  var_labs_df     <- var_labs_df %>% filter(name %in% names(data))
-  var_labs_list   <- as.list(var_labs_df$label)
-  names(var_labs_list) <- var_labs_df$name
+  var_labs_df          <- var_labs_df %>% filter(name %in% names(data))
+  var_labs_list        <- as.list(var_labs_df$label)
+  names(var_labs_list) <- var_labs_df$name #variable labels have to be inside a named list for tbl_summary()
 
   if (!is.null(groupby)) {
 
@@ -26,13 +27,13 @@ desc_table <- function(data, vars, var_labs_df, groupby = NULL) {
 
     tab <- tbl_summary(data = data,
                        label = var_labs_list,
-                       missing_text = "preskočil otázku",
+                       missing_text = "přeskočil otázku",
                        by = !!groupby)
   } else {
 
   tab <- tbl_summary(data = data,
                      label = var_labs_list,
-                     missing_text = "preskočil otázku")
+                     missing_text = "přeskočil otázku")
   }
 
   tab %>%

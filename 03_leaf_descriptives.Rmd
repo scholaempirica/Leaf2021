@@ -40,6 +40,9 @@ leaf <- read_rds("data-processed/leaf.rds")
 ```
 
 ```{r var-labels}
+# All of this is the preparation of the variable labels data frame
+# the data frame has to have two variables, "name" and "label" for desc_table() to function
+
 var_labs <- attr(leaf, "variable.labels")
 var_labs <- if_else(str_detect(var_labs, "\\]"), str_extract(var_labs, "(^.+)\\]"), var_labs)
 var_labs <- str_replace(var_labs, "\\[", "")
