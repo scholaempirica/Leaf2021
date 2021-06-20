@@ -1,0 +1,62 @@
+---
+title: "LEAF 2021 questionnaire"
+subtitle: "Results overview"
+team: výzkumný tým SCHOLA EMPIRICA # delete whole entry if undesirable
+author:
+- "Aleš Vomáčka^[Contact author. E-mail: vomacka@scholaempirica.org]" # complex entry must be quoted
+- Martina Koutná
+- Marek Havrda # "and"/"a" is added automatically in selected locale
+date: "`r as.Date(Sys.time())`" # if Czech, use reschola::as_czech_date(Sys.time())
+output: 
+  reschola::schola_pdf:
+    num_format: cs # inline formatting for numbers (1 000,00 with "cs")
+toc-title: "Table of contents"
+abstract-title: Abstract
+lang: en # smart-quotes and author variable depends on the lang variable
+logo: logos/schola # chars which are escaped by pandoc (i.e. "_") are prohibited
+logo_height: 20pt
+logo_client: false
+logo_client_height: 30pt
+head_height: false # may be used if fancyhdr complains 
+---
+
+```{r setup, include=FALSE}
+options(scipen = 10) # force R to show full numbers, not scientific notation
+
+library(reschola)
+library(tidyverse)
+library(scales)
+library(kableExtra)
+library(flextable)
+library(gtsummary)
+set_reschola_ggplot_fonts() # make ggplot2 use Roboto fonts without you having to set it
+theme_set(theme_schola()) # default ggplot theme
+source("98_custom_functions.R", encoding = "UTF-8")
+source("shared.R", local = TRUE, encoding = "UTF-8") # helper functions and shared code
+```
+
+```{r data}
+leaf <- read_rds("data-processed/leaf.rds")
+```
+
+```{r var-labels}
+var_labs <- attr(leaf, "variable.labels")
+var_labs <- if_else(str_detect(var_labs, "\\]"), str_extract(var_labs, "(^.+)\\]"), var_labs)
+var_labs <- str_replace(var_labs, "\\[", "")
+var_labs <- str_replace(var_labs, "\\]", "")
+var_labs <- str_trim(var_labs)
+
+var_labs_df <- tibble(name  = names(leaf),
+                      label = var_labs)
+
+var_labs_df$label <- case_when(var_labs_df$name == "S4Q1" ~ "Pohlaví",
+                               var_labs_df$name == "S4Q2" ~ "Věk",
+                               var_labs_df$name == "S4Q3" ~ "Dosažené vzdělání",
+                               TRUE ~ var_labs_df$label)
+```
+
+# Demografické údaje
+
+```{r demographics}
+desc_table(leaf, S4Q1:S4Q3, var_labs_df)
+```
