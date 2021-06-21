@@ -55,11 +55,90 @@ var_labs_df <- tibble(name  = names(leaf),
 var_labs_df$label <- case_when(var_labs_df$name == "S4Q1" ~ "Pohlaví",
                                var_labs_df$name == "S4Q2" ~ "Věk",
                                var_labs_df$name == "S4Q3" ~ "Dosažené vzdělání",
+                               var_labs_df$name == "S4Q7" ~ "Ekonomický profil",
                                TRUE ~ var_labs_df$label)
 ```
 
 # Demografické údaje
 
-```{r demographics}
+```{r gender-age-education}
 desc_table(leaf, S4Q1:S4Q3, var_labs_df)
+```
+
+\newpage
+
+# Absolvované programy
+
+```{r program1}
+leaf %>% 
+  select(S4Q4_a:S4Q4_d) %>% 
+  select(!contains("comment")) %>% 
+  desc_table(everything(), var_labs_df)
+```
+
+\newpage
+
+```{r program2}
+leaf %>% 
+  select(S4Q4_e:S4Q4_h) %>% 
+  select(!contains("comment")) %>% 
+  desc_table(everything(), var_labs_df)
+```
+
+\newpage
+
+```{r program3}
+leaf %>% 
+  select(S4Q4_i:S4Q4_l) %>% 
+  select(!contains("comment")) %>% 
+  desc_table(everything(), var_labs_df)
+```
+
+\newpage
+
+```{r program4}
+leaf %>% 
+  select(S4Q4_m:S4Q4_q) %>% 
+  select(!contains("comment")) %>% 
+  desc_table(everything(), var_labs_df)
+```
+
+\newpage
+
+# Místo bydliště
+
+```{r place-of-living}
+desc_table(leaf, c("S4Q5", "S4Q6"), var_labs_df)
+```
+
+\newpage
+
+# Ekonomický profil
+
+## Ekonomický profil agregovaný
+
+```{r economic-profil-aggr}
+desc_table(leaf, S4Q7, var_labs_df)
+```
+
+\newpage
+
+## Ekonomický profil podle pohlaví
+
+```{r economic-profile-sex}
+desc_table(leaf, c("S4Q1", "S4Q7"), var_labs_df, "S4Q1")
+```
+
+\newpage
+
+## Ekonomický profil podle věku
+
+```{r economic-profile-age}
+desc_table(leaf, c("S4Q2", "S4Q7"), var_labs_df, "S4Q2")
+```
+
+\newpage
+
+```{r economic-profile-region}
+desc_table(leaf, c("S4Q5", "S4Q7"), var_labs_df, "S4Q5")
 ```
