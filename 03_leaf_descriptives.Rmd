@@ -1,18 +1,19 @@
 ---
-title: "LEAF 2021 questionnaire"
-subtitle: "Results overview"
+title: "LEAF 2021 dotazníkové šetření"
+subtitle: "Přehled výsledků"
 team: výzkumný tým SCHOLA EMPIRICA # delete whole entry if undesirable
 author:
-- "Aleš Vomáčka^[Contact author. E-mail: vomacka@scholaempirica.org]" # complex entry must be quoted
+- "Aleš Vomáčka^[Kontaktní autor. E-mail: vomacka@scholaempirica.org]" # complex entry must be quoted
 - Martina Koutná
 - Marek Havrda # "and"/"a" is added automatically in selected locale
-date: "`r as.Date(Sys.time())`" # if Czech, use reschola::as_czech_date(Sys.time())
+date: "`r reschola::as_czech_date(Sys.time())`" # if Czech, use reschola::as_czech_date(Sys.time())
 output: 
   reschola::schola_pdf:
     num_format: cs # inline formatting for numbers (1 000,00 with "cs")
-toc-title: "Table of contents"
+    number_sections: true
+toc-title: "Obsah"
 abstract-title: Abstract
-lang: en # smart-quotes and author variable depends on the lang variable
+lang: cs # smart-quotes and author variable depends on the lang variable
 logo: logos/schola # chars which are escaped by pandoc (i.e. "_") are prohibited
 logo_height: 20pt
 logo_client: false
@@ -56,10 +57,13 @@ var_labs_df$label <- case_when(var_labs_df$name == "S4Q1" ~ "Pohlaví",
                                var_labs_df$name == "S4Q2" ~ "Věk",
                                var_labs_df$name == "S4Q3" ~ "Dosažené vzdělání",
                                var_labs_df$name == "S4Q7" ~ "Ekonomický profil",
+                               var_labs_df$name == "S5Q2" ~ "Souhlasí s rozhovorem?",
+                               var_labs_df$name == "S2Q3_a" ~ "LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom\n(1 = určite nie, 6 = určite áno)",
+                               var_labs_df$name == "S5Q1_a" ~ "môj vplyv na spoločenské dianie\n(1 = veľmi veľký vplyv, 5 = nulový vplyv)",
                                TRUE ~ var_labs_df$label)
 ```
 
-# Demografické údaje
+# Pohlaví, věk a dosažené vzdělání
 
 ```{r gender-age-education}
 desc_table(leaf, S4Q1:S4Q3, var_labs_df)
@@ -71,34 +75,7 @@ desc_table(leaf, S4Q1:S4Q3, var_labs_df)
 
 ```{r program1}
 leaf %>% 
-  select(S4Q4_a:S4Q4_d) %>% 
-  select(!contains("comment")) %>% 
-  desc_table(everything(), var_labs_df)
-```
-
-\newpage
-
-```{r program2}
-leaf %>% 
-  select(S4Q4_e:S4Q4_h) %>% 
-  select(!contains("comment")) %>% 
-  desc_table(everything(), var_labs_df)
-```
-
-\newpage
-
-```{r program3}
-leaf %>% 
-  select(S4Q4_i:S4Q4_l) %>% 
-  select(!contains("comment")) %>% 
-  desc_table(everything(), var_labs_df)
-```
-
-\newpage
-
-```{r program4}
-leaf %>% 
-  select(S4Q4_m:S4Q4_q) %>% 
+  select(S4Q4_a:S4Q4_q) %>% 
   select(!contains("comment")) %>% 
   desc_table(everything(), var_labs_df)
 ```
@@ -115,7 +92,7 @@ desc_table(leaf, c("S4Q5", "S4Q6"), var_labs_df)
 
 # Ekonomický profil
 
-## Ekonomický profil agregovaný
+## Agregovaně
 
 ```{r economic-profil-aggr}
 desc_table(leaf, S4Q7, var_labs_df)
@@ -123,7 +100,7 @@ desc_table(leaf, S4Q7, var_labs_df)
 
 \newpage
 
-## Ekonomický profil podle pohlaví
+## Podle pohlaví
 
 ```{r economic-profile-sex}
 desc_table(leaf, c("S4Q1", "S4Q7"), var_labs_df, "S4Q1")
@@ -131,7 +108,7 @@ desc_table(leaf, c("S4Q1", "S4Q7"), var_labs_df, "S4Q1")
 
 \newpage
 
-## Ekonomický profil podle věku
+## Podle věku
 
 ```{r economic-profile-age}
 desc_table(leaf, c("S4Q2", "S4Q7"), var_labs_df, "S4Q2")
@@ -139,6 +116,762 @@ desc_table(leaf, c("S4Q2", "S4Q7"), var_labs_df, "S4Q2")
 
 \newpage
 
+## Podle země bydliště
+
 ```{r economic-profile-region}
 desc_table(leaf, c("S4Q5", "S4Q7"), var_labs_df, "S4Q5")
+```
+
+\newpage
+
+# Počet poskytnutých kontaktů a souhlasů s interview
+
+```{r contact-labs}
+contact_lab <- tibble(name  = c("contact", "S4Q2", "S4Q5", "S4Q6", "S4Q7"),
+                      label = c("Poskytl kontaktní email?", "Věk", "Země bydliště", "Region bydliště", "Ekonomický profil"))
+```
+
+## Podle věku
+
+```{r interview-contact-age}
+leaf %>% 
+  mutate(contact = ifelse(S6Q1_SQ003 == "", "nie", "áno")) %>% 
+  desc_table(c("contact", "S4Q2"), var_labs_df = contact_lab, groupby = "contact")
+```
+
+\newpage
+
+## Podle místa bydliště a ekonomického profilu
+
+```{r contact-country-region}
+leaf %>% 
+  mutate(contact = ifelse(S6Q1_SQ003 == "", "nie", "áno")) %>% 
+  desc_table(c("contact", "S4Q5", "S4Q6", "S4Q7"), var_labs_df = contact_lab, groupby = "contact")
+```
+
+\newpage
+
+# Počet respondentů souhlasících s návazným interview
+
+```{r interview}
+desc_table(leaf, c("S5Q2", "S4Q5", "S4Q6", "S4Q7"), var_labs_df, groupby = "S5Q2")
+```
+
+\newpage
+
+# Postoje k současnostni a budoucnosti Slovenska
+
+## Agregovaně
+
+Otázka: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+
+```{r future}
+leaf %>% 
+  mutate(across(starts_with("S1Q1"),
+                ~fct_relevel(., "neviem posúdiť")),
+         across(starts_with("S1Q1"),
+                ~fct_rev(.))) %>% 
+desc_table(starts_with("S1Q1"), var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+
+```{r future-country}
+leaf %>% 
+  mutate(across(starts_with("S1Q1"),
+                ~fct_relevel(., "neviem posúdiť")),
+         across(starts_with("S1Q1"),
+                ~fct_rev(.))) %>% 
+desc_table(c(starts_with("S1Q1"), "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+## Podle regionu byliště (Slovensko)
+
+Otázka: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+
+```{r future-region}
+leaf %>% 
+  mutate(across(starts_with("S1Q1"),
+                ~fct_relevel(., "neviem posúdiť")),
+         across(starts_with("S1Q1"),
+                ~fct_rev(.))) %>% 
+desc_table(c(starts_with("S1Q1"), "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+
+```{r future-profile}
+leaf %>% 
+  mutate(across(starts_with("S1Q1"),
+                ~fct_relevel(., "neviem posúdiť")),
+         across(starts_with("S1Q1"),
+                ~fct_rev(.)),
+         S4Q7 = fct_recode(S4Q7,
+                           `rodičovská dovolenka` = "som na rodičovskej dovolenke",
+                           `študent` = "študent/ka",
+                           `podnikateľ` = "podnikateľ/ka")) %>% 
+  desc_table(c(starts_with("S1Q1"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle věku
+
+Otázka: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+
+```{r future-age}
+leaf %>% 
+  mutate(across(starts_with("S1Q1"),
+                ~fct_relevel(., "neviem posúdiť")),
+         across(starts_with("S1Q1"),
+                ~fct_rev(.))) %>% 
+desc_table(c(starts_with("S1Q1"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# Sociální skupiny a výběr studijní/pracovní dráhy
+
+## Průměrná důležitost soc. skupin
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+### Agregovaně
+
+```{r group-importance-mean}
+leaf %>% 
+  select(starts_with("S2Q1")) %>% 
+  drop_na() %>% 
+desc_table(starts_with("S2Q1"), var_labs_df) %>% 
+  footnote(i = 1, j = 2, value = as_paragraph("Průměry pro jednotlivé proměnné"))
+```
+
+\newpage
+
+### Podle země bydliště
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-mean-country}
+leaf %>% 
+  select(starts_with("S2Q1"), S4Q5) %>% 
+  drop_na() %>% 
+desc_table(c(starts_with("S2Q1"), "S4Q5"), var_labs_df, groupby = "S4Q5") %>% 
+  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")
+```
+
+\newpage
+
+### Podle regionu byliště (Slovensko)
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+
+```{r group-importance-mean-region}
+leaf %>% 
+  select(starts_with("S2Q1"), region) %>% 
+  drop_na() %>% 
+desc_table(c(starts_with("S2Q1"), "region"), var_labs_df, groupby = "region") %>% 
+  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")
+```
+
+\newpage
+
+### Podle ekonomického profilu
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-mean-profile}
+leaf %>% 
+  select(starts_with("S2Q1"), S4Q7) %>% 
+  drop_na() %>% 
+desc_table(c(starts_with("S2Q1"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+\newpage
+
+### Podle věku
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-mean-age}
+leaf %>% 
+  select(starts_with("S2Q1"), S4Q2) %>% 
+  drop_na() %>% 
+desc_table(c(starts_with("S2Q1"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")  %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+## Rozložení důležitosti skupin pro výběr studijní/pracovní dráhy
+
+### Agregovaně
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-freq}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. > 70 ~ "71 až 100",
+                                   . > 30 ~ "31 až 70",
+                                   . <= 30 ~ "0 až 30")),
+         across(.cols = starts_with("S2Q1"),
+                .fns  = ~fct_rev(.))) %>% 
+  desc_table(starts_with("S2Q1"), var_labs_df)
+```
+
+\newpage
+
+### Podle země bydliště
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-freq-country}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. > 70 ~ "71 až 100",
+                                   . > 30 ~ "31 až 70",
+                                   . <= 30 ~ "0 až 30")),
+         across(.cols = starts_with("S2Q1"),
+                .fns  = ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q1"), S4Q5), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+### Podle regionu bydliště (Slovensko)
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-freq-region}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. > 70 ~ "71 až 100",
+                                   . > 30 ~ "31 až 70",
+                                   . <= 30 ~ "0 až 30")),
+         across(.cols = starts_with("S2Q1"),
+                .fns  = ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q1"), region), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+### Podle ekonomického profilu
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-freq-profile}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. > 70 ~ "71 až 100",
+                                   . > 30 ~ "31 až 70",
+                                   . <= 30 ~ "0 až 30")),
+         across(.cols = starts_with("S2Q1"),
+                .fns  = ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q1"), S4Q7), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+### Podle věku
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-freq-age}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. > 70 ~ "71 až 100",
+                                   . > 30 ~ "31 až 70",
+                                   . <= 30 ~ "0 až 30")),
+         across(.cols = starts_with("S2Q1"),
+                .fns  = ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q1"), S4Q2), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+## Počet maximálních odpovědí u důležitosti skupin pro výběr studijní/pracovní dráhy
+
+### Agregovaně
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-max}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. == 100 ~ "maximální hodnota",
+                                   . < 100  ~ "nižší hodnota"))) %>% 
+  desc_table(starts_with("S2Q1"), var_labs_df)
+```
+
+\newpage
+
+### Podle země bydliště
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-max-country}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. == 100 ~ "maximální hodnota",
+                                   . < 100  ~ "nižší hodnota"))) %>% 
+  desc_table(c(starts_with("S2Q1"), "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+### Podle regionu bydliště (Slovensko)
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-max-region}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. == 100 ~ "maximální hodnota",
+                                   . < 100  ~ "nižší hodnota"))) %>% 
+  desc_table(c(starts_with("S2Q1"), "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+### Podle ekonomického profilu
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-max-profile}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. == 100 ~ "maximální hodnota",
+                                   . < 100  ~ "nižší hodnota"))) %>% 
+  desc_table(c(starts_with("S2Q1"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+### Podle věku
+
+Otázka: *Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?*
+
+```{r group-importance-max-age}
+leaf %>% 
+  mutate(across(.cols = starts_with("S2Q1"),
+                .fns  = ~case_when(. == 100 ~ "maximální hodnota",
+                                   . < 100  ~ "nižší hodnota"))) %>% 
+  desc_table(c(starts_with("S2Q1"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# Vnímaný pozitivní vliv LEAFu
+
+## Agregovaně
+
+Otázka: *Ako s odstupom času hodnotíš prínos tvojej skúsenosti v LEAF programe?*
+
+```{r leaf-positive}
+leaf %>% 
+  mutate(S2Q3_a = as_factor(S2Q3_a)) %>% 
+  desc_table(S2Q3_a, var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Ako s odstupom času hodnotíš prínos tvojej skúsenosti v LEAF programe?*
+
+```{r leaf-positive-country}
+leaf %>% 
+  mutate(S2Q3_a = as_factor(S2Q3_a)) %>% 
+  desc_table(c("S2Q3_a", "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+## Podle regionu bydliště
+
+Otázka: *Ako s odstupom času hodnotíš prínos tvojej skúsenosti v LEAF programe?*
+
+```{r leaf-positive-region}
+leaf %>% 
+  mutate(S2Q3_a = as_factor(S2Q3_a)) %>% 
+  desc_table(c("S2Q3_a", "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Ako s odstupom času hodnotíš prínos tvojej skúsenosti v LEAF programe?*
+
+```{r leaf-positive-profile}
+leaf %>% 
+  mutate(S2Q3_a = as_factor(S2Q3_a)) %>% 
+  desc_table(c("S2Q3_a", "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle věku
+
+Otázka: *Ako s odstupom času hodnotíš prínos tvojej skúsenosti v LEAF programe?*
+
+```{r leaf-positive-age}
+leaf %>% 
+  mutate(S2Q3_a = as_factor(S2Q3_a)) %>% 
+  desc_table(c("S2Q3_a", "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# LEAF a rozvoj osobního/profesního života
+
+## Agregovaně
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-development}
+leaf %>% 
+  mutate(across(starts_with("S2Q5"),
+                ~fct_relevel(., "netýka sa ma")),
+         across(starts_with("S2Q5"),
+                ~fct_rev(.))) %>% 
+  desc_table(starts_with("S2Q5"), var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-development-country}
+leaf %>% 
+  mutate(across(starts_with("S2Q5"),
+                ~fct_relevel(., "netýka sa ma")),
+         across(starts_with("S2Q5"),
+                ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q5"), "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+## Podle regionu bydliště (Slovensko)
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-development-region}
+leaf %>% 
+  mutate(across(starts_with("S2Q5"),
+                ~fct_relevel(., "netýka sa ma")),
+         across(starts_with("S2Q5"),
+                ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q5"), "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-development-profile}
+leaf %>% 
+  mutate(across(starts_with("S2Q5"),
+                ~fct_relevel(., "netýka sa ma")),
+         across(starts_with("S2Q5"),
+                ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q5"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle věku
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-development-age}
+leaf %>% 
+  mutate(across(starts_with("S2Q5"),
+                ~fct_relevel(., "netýka sa ma")),
+         across(starts_with("S2Q5"),
+                ~fct_rev(.))) %>% 
+  desc_table(c(starts_with("S2Q5"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# LEAF a životní rozhodnutí
+
+## Agregovaně
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-inspiration}
+desc_table(leaf, starts_with("S2Q6"), var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-inspiration-country}
+desc_table(leaf, c(starts_with("S2Q6"), "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+## Podle regionu bydliště (Slovensko)
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-inspiration-region}
+desc_table(leaf, c(starts_with("S2Q6"), "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-inspiration-profile}
+desc_table(leaf, c(starts_with("S2Q6"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle věku
+
+Otázka: *Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života?*
+
+```{r leaf-inspiration-age}
+desc_table(leaf, c(starts_with("S2Q6"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# Aktivity za poslední dva roky
+
+## Agregovaně
+
+Otázka: *Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ?*
+
+```{r activities}
+desc_table(leaf, starts_with("S3Q1"), var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ?*
+
+```{r activities-country}
+desc_table(leaf, c(starts_with("S3Q1"), "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+## Podle regionu bydliště (Slovensko)
+
+Otázka: *Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ?*
+
+```{r activities-region}
+desc_table(leaf, c(starts_with("S3Q1"), "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ?*
+
+```{r activities-profile}
+desc_table(leaf, c(starts_with("S3Q1"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle věku
+
+Otázka: *Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ?*
+
+```{r activities-age}
+desc_table(leaf, c(starts_with("S3Q1"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# Současná forma kontaktu s LEAFem
+
+## Agregovaně
+
+Otázka: *Akou formou máš dnes kontakt s LEAF?*
+
+```{r contact}
+desc_table(leaf, starts_with("S3Q4"), var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Akou formou máš dnes kontakt s LEAF?*
+
+```{r contact-country}
+desc_table(leaf, c(starts_with("S3Q4"), "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+## Podle regionu bydliště (Slovensko)
+
+Otázka: *Akou formou máš dnes kontakt s LEAF?*
+
+```{r contact-region}
+desc_table(leaf, c(starts_with("S3Q4"), "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Akou formou máš dnes kontakt s LEAF?*
+
+```{r contact-profile}
+desc_table(leaf, c(starts_with("S3Q4"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle věku
+
+Otázka: *Akou formou máš dnes kontakt s LEAF?*
+
+```{r contact-age}
+desc_table(leaf, c(starts_with("S3Q4"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# Osobní vliv na společenské dění
+
+## Agregovaně
+
+Otázka: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
+
+```{r personal-influence}
+leaf %>% 
+  mutate(S5Q1_a = as_factor(S5Q1_a)) %>% 
+  desc_table(S5Q1_a, var_labs_df)
+```
+
+\newpage
+
+## Podle země bydliště
+
+Otázka: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
+
+```{r personal-influence-country}
+leaf %>% 
+  mutate(S5Q1_a = as_factor(S5Q1_a)) %>% 
+  desc_table(c("S5Q1_a", "S4Q5"), var_labs_df, groupby = "S4Q5")
+```
+
+\newpage
+
+## Podle regionu bydliště (Slovensko)
+
+Otázka: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
+
+```{r personal-influence-region}
+leaf %>% 
+  mutate(S5Q1_a = as_factor(S5Q1_a)) %>% 
+  desc_table(c("S5Q1_a", "region"), var_labs_df, groupby = "region")
+```
+
+\newpage
+
+## Podle ekonomického profilu
+
+Otázka: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
+
+```{r personal-influence-profile}
+leaf %>% 
+  mutate(S5Q1_a = as_factor(S5Q1_a)) %>% 
+  desc_table(c("S5Q1_a", "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
+  fontsize(size = 6, part = "header") %>% 
+  fontsize(size = 7, j = -1, part = "body") %>% 
+  fontsize(size = 8, j = 1, part = "body")
+```
+
+\newpage
+
+## Podle země věku
+
+Otázka: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
+
+```{r personal-influence-age}
+leaf %>% 
+  mutate(S5Q1_a = as_factor(S5Q1_a)) %>% 
+  desc_table(c("S5Q1_a", "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
+  fontsize(size = 8, part = "header") %>% 
+  fontsize(size = 8, j = -1, part = "body")
 ```

@@ -27,12 +27,14 @@ desc_table <- function(data, vars, var_labs_df, groupby = NULL) {
 
     tab <- tbl_summary(data = data,
                        label = var_labs_list,
+                       statistic = list(where(is.numeric) ~ "{mean}"),
                        missing_text = "přeskočil otázku",
                        by = !!groupby)
   } else {
 
   tab <- tbl_summary(data = data,
                      label = var_labs_list,
+                     statistic = list(where(is.numeric) ~ "{mean}"),
                      missing_text = "přeskočil otázku")
   }
 
