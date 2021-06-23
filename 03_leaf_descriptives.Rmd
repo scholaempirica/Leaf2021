@@ -124,7 +124,7 @@ desc_table(leaf, c("S4Q5", "S4Q7"), var_labs_df, "S4Q5")
 
 \newpage
 
-# Počet poskytnutých kontaktů a souhlasů s interview
+# Počet poskytnutých kontaktních emailů
 
 ```{r contact-labs}
 contact_lab <- tibble(name  = c("contact", "S4Q2", "S4Q5", "S4Q6", "S4Q7"),
@@ -272,7 +272,7 @@ leaf %>%
   select(starts_with("S2Q1"), S4Q5) %>% 
   drop_na() %>% 
 desc_table(c(starts_with("S2Q1"), "S4Q5"), var_labs_df, groupby = "S4Q5") %>% 
-  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")
+  footnote(i = 1, j = 2, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")
 ```
 
 \newpage
@@ -287,7 +287,7 @@ leaf %>%
   select(starts_with("S2Q1"), region) %>% 
   drop_na() %>% 
 desc_table(c(starts_with("S2Q1"), "region"), var_labs_df, groupby = "region") %>% 
-  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")
+  footnote(i = 1, j = 2, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header")
 ```
 
 \newpage
@@ -301,7 +301,7 @@ leaf %>%
   select(starts_with("S2Q1"), S4Q7) %>% 
   drop_na() %>% 
 desc_table(c(starts_with("S2Q1"), "S4Q7"), var_labs_df, groupby = "S4Q7") %>% 
-  footnote(i = 1, j = 2:3, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header") %>% 
+  footnote(i = 1, j = 2, value = as_paragraph("Průměry pro jednotlivé proměnné"), part = "header") %>% 
   fontsize(size = 6, part = "header") %>% 
   fontsize(size = 7, j = -1, part = "body") %>% 
   fontsize(size = 8, j = 1, part = "body")
@@ -874,4 +874,22 @@ leaf %>%
   desc_table(c("S5Q1_a", "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
   fontsize(size = 8, part = "header") %>% 
   fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+# Důležité neziskové organizace
+
+Otázka: *Mohol/la by si uviesť , prosím, ktorú neziskovú organizáciu, občianske združenie, nadáciu máš na mysli, že bola dôležitá pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej dráhy?*
+
+Poznámka: Odpovědí je více, než respondentů, protože každý respondend mohl uvést až tři organizace.
+
+```{r organization}
+org_lab <- tibble(name  = "value",
+                  label = "zvolená organizácie")
+
+leaf %>%
+  select(starts_with("S2Q2")) %>% 
+  pivot_longer(everything()) %>% 
+  desc_table(value, org_lab)
 ```

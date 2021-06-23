@@ -1,6 +1,7 @@
 # Data and packages -------------------------------------------------------
 
 library(tidyverse)
+library(labelled)
 library(writexl)
 
 leaf <- read_rds("data-input/leaf.rds")
@@ -14,8 +15,10 @@ leaf <- leaf %>%
                       .fns  = ~ str_extract(., "[:digit:]")), #some variable included labels combined with values
                across(.cols = c("S2Q3_a", "S5Q1_a"),
                       .fns  = ~as.numeric(.)),
-               S4Q5 = fct_explicit_na(S4Q5, "Iné")) # Not-living-in-Slovakia is a valid value, not NA
+               S4Q5 = fct_explicit_na(S4Q5, "Iné"), # Not-living-in-Slovakia is a valid value, not NA
+               region = ifelse(S4Q6 == "Bratislava a Bratislavský kraj", "Bratislavský kraj", "Iný kraj")) #collapsed region for succinct tables down the line
 
+attr(leaf, which = "variable.labels") <- c(attr(leaf, "variable.labels"), "Kraj bydliska")
 
 # Collapsing country of living into smaller number of categories
 england     <- c("Uk", "Spojene kralovstvo", "Velka britania", "Spojené kráľovstvo", "Anglicko", "United kingdom", "Veľká británia")
@@ -35,11 +38,39 @@ leaf <- leaf %>%
                                 S4Q5_other %in% usa         ~ "Spojené státy Americké",
                                 TRUE                        ~ S4Q5_other))
 
+# Cleaning organization names
+
+osf <- c("Osf Slovensko", "Osf, Nzk, Tis", "Osf Slovensko")
+missing <- c("Nemám", "Nemám Žiadnu Takúto Organizáciu", "Neviem Si Na Žiadnu Spomenúť",
+             "V Tom Čase Ešte Žiadna, Ale Táto Otázka Nie Je Relevantná Pre Mňa, Len Nemôžem Pokračovať Ďalej", "-")
+
+leaf <- leaf %>%
+  mutate(across(.cols = starts_with("S2Q2"),
+                .fns  = ~str_to_title(.)),
+         across(.cols = starts_with("S2Q2"),
+                .fns  = ~str_trim(.)),
+         across(.cols = starts_with("S2Q2"),
+                .fns  = ~case_when(str_detect(., "Leaf") ~ "Leaf",
+                                  . == "Aiesec"         ~ "Aisec",
+                                  . == "Dofe Slovensko" ~ "Dofe",
+                                  . == "Erko - Hnutie Kresťanských Spoločenstiev Detí" ~ "Erko",
+                                  . == "Kdn - Klub Detskej Nádeje" ~ "Klub Detskej Nádeje",
+                                  . == "Letná Akadémia Discover - Slovenská Debatná Asociácia" ~ "Letná Akadémia Discover",
+                                  . == "Open Society Foundation - Katarína Križková" ~ "Open Society Foundation",
+                                  . == "Pre Stredoskolakov" ~ "Pre Stredoškolákov",
+                                  . == "Slovenský Skauting - 1.Zbor Bratislava A Rozhovory So Staršími Skautmi" ~ "Slovenský Skauting",
+                                  . == "Strom O.z." ~ "Strom",
+                                  . == "Transparency International Slovensko" ~ "Transparency International",
+                                  . %in% osf ~ "Osf",
+                                  . %in% missing ~ NA_character_,
+                                  . == "" ~ NA_character_,
+                                  TRUE ~ .)))
+
+
 
 leaf_xlsx <- leaf
 names(leaf_xlsx) <-  paste(names(leaf_xlsx), attr(leaf_xlsx, "variable.labels"), sep = "_") # Added labels to var names, so that they can
                                                                                             # can be preserved in .xlsx
-
 # Data export -------------------------------------------------------------
 
 write_rds(leaf, "data-processed/leaf.rds")

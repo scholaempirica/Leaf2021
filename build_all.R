@@ -4,11 +4,9 @@
 # Typically, those will be source() or rmarkdown::render() calls, like below.
 
 
-source('002_read-data.R')
-source('003_check-and-process-data.R')
-rmarkdown::render('01_schola-styled-word.Rmd', output_dir = 'reports-output')
-rmarkdown::render('02_schola-styled-redoc.Rmd', output_dir = 'reports-output')
-rmarkdown::render('99_reproducibility.Rmd', output_dir = 'reports-output')
+source('01_data-import.R', encoding = "UTF-8")
+source('02_data-cleaning.R', encoding = "UTF-8")
+rmarkdown::render('03_leaf_descriptives.Rmd', output_dir = 'reports-output')
 
 
 
