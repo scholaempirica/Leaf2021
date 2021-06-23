@@ -245,6 +245,17 @@ desc_table(c(starts_with("S1Q1"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>%
 
 \newpage
 
+## Podle vlivu LEAF
+
+Otázka 1: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+Otázka 2: *LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1 = určite nie, 6 = určite áno)*
+
+```{r future-leaf}
+desc_table(leaf, c(starts_with("S1Q1"), "S2Q3_coll"), var_labs_df, groupby = "S2Q3_coll")
+```
+
+\newpage
+
 # Sociální skupiny a výběr studijní/pracovní dráhy
 
 ## Průměrná důležitost soc. skupin
@@ -754,6 +765,17 @@ desc_table(leaf, c(starts_with("S3Q1"), "S4Q2"), var_labs_df, groupby = "S4Q2") 
 
 \newpage
 
+## Podle vlivu LEAF
+
+Otázka 1: *Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ?*
+Otázka 2: *LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1 = určite nie, 6 = určite áno)*
+
+```{r activities-leaf}
+desc_table(leaf, c(starts_with("S3Q1"), "S2Q3_coll"), var_labs_df, groupby = "S2Q3_coll")
+```
+
+\newpage
+
 # Současná forma kontaktu s LEAFem
 
 ## Agregovaně
@@ -807,6 +829,16 @@ Otázka: *Akou formou máš dnes kontakt s LEAF?*
 desc_table(leaf, c(starts_with("S3Q4"), "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
   fontsize(size = 8, part = "header") %>% 
   fontsize(size = 8, j = -1, part = "body")
+```
+
+
+## Podle vlivu LEAF
+
+Otázka 1: *Akou formou máš dnes kontakt s LEAF?*
+Otázka 2: *LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1 = určite nie, 6 = určite áno)*
+
+```{r contact-leaf}
+desc_table(leaf, c(starts_with("S3Q4"), "S2Q3_coll"), var_labs_df, groupby = "S2Q3_coll")
 ```
 
 \newpage
@@ -864,7 +896,7 @@ leaf %>%
 
 \newpage
 
-## Podle země věku
+## Podle věku
 
 Otázka: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
 
@@ -874,6 +906,19 @@ leaf %>%
   desc_table(c("S5Q1_a", "S4Q2"), var_labs_df, groupby = "S4Q2") %>% 
   fontsize(size = 8, part = "header") %>% 
   fontsize(size = 8, j = -1, part = "body")
+```
+
+\newpage
+
+## Podle vlivu LEAF
+
+Otázka 1: *Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície?*
+Otázka 2: *LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1 = určite nie, 6 = určite áno)*
+
+```{r personal-influence-leaf}
+leaf %>% 
+  mutate(S5Q1_a = as_factor(S5Q1_a)) %>% 
+  desc_table(c("S5Q1_a", "S2Q3_coll"), var_labs_df, groupby = "S2Q3_coll")
 ```
 
 \newpage
