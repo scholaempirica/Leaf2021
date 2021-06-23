@@ -76,9 +76,17 @@ leaf <- leaf %>%
 
 attr(leaf, which = "variable.labels") <- c(attr(leaf, "variable.labels"), attr(leaf, "variable.labels")[25]) #added the same label as the original scale
 
-var_labs <- attr(leaf, "variable.labels")
+# scaling S2Q3_a scale
+
+leaf$dimension1 <- leaf$S2Q3_a # LEAF wanted this variable again called dimension1 for some reason
+attr(leaf, which = "variable.labels") <- c(attr(leaf, "variable.labels"), "Dimenze 1")
+
+# scaling S5Q1_a
+leaf$dimension2 <- leaf$S5Q1_a # LEAF wanted this variable again called dimension2 for some reason
+attr(leaf, which = "variable.labels") <- c(attr(leaf, "variable.labels"), "Dimenze 2")
 
 # Scoring S1Q1 scale
+var_labs <- attr(leaf, "variable.labels")
 
 leaf <- leaf %>%
   mutate(S1Q1_an = case_when(S1Q1_a == "vôbec nesúhlasím" ~ -1,
