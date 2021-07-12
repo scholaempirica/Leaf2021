@@ -268,3 +268,140 @@ leaf %>%
     theme_booktabs() %>%
     FitFlextableToPage()
 ```
+
+\newpage
+
+# Současnost a budoucnost Slovenska podle vlivu LEAFu
+
+Otázka 1: **Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.**
+Otázka 2: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1=určite nie; 6=určite áno)**
+
+```{r future-impact-a}
+leaf %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a >= 5 ~ "5-6",
+                            S2Q3_a >= 3 ~ "3-4",
+                            S2Q3_a >= 1 ~ "1-2",
+                            TRUE        ~ NA_character_)) %>% 
+  desc_table(vars = c(S1Q1_a, S2Q3_a), var_labs_df, groupby = "S2Q3_a")
+```
+
+
+```{r future-impact-b}
+leaf %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a >= 5 ~ "5-6",
+                            S2Q3_a >= 3 ~ "3-4",
+                            S2Q3_a >= 1 ~ "1-2",
+                            TRUE        ~ NA_character_)) %>% 
+  desc_table(vars = c(S1Q1_b, S2Q3_a), var_labs_df, groupby = "S2Q3_a")
+```
+
+```{r future-impact-c}
+leaf %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a >= 5 ~ "5-6",
+                            S2Q3_a >= 3 ~ "3-4",
+                            S2Q3_a >= 1 ~ "1-2",
+                            TRUE        ~ NA_character_)) %>% 
+  desc_table(vars = c(S1Q1_c, S2Q3_a), var_labs_df, groupby = "S2Q3_a")
+```
+
+```{r future-impact-d}
+leaf %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a >= 5 ~ "5-6",
+                            S2Q3_a >= 3 ~ "3-4",
+                            S2Q3_a >= 1 ~ "1-2",
+                            TRUE        ~ NA_character_)) %>% 
+  desc_table(vars = c(S1Q1_d, S2Q3_a), var_labs_df, groupby = "S2Q3_a")
+```
+
+```{r future-impact-e}
+leaf %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a >= 5 ~ "5-6",
+                            S2Q3_a >= 3 ~ "3-4",
+                            S2Q3_a >= 1 ~ "1-2",
+                            TRUE        ~ NA_character_)) %>% 
+  desc_table(vars = c(S1Q1_e, S2Q3_a), var_labs_df, groupby = "S2Q3_a")
+```
+
+```{r future-impact-f}
+leaf %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a >= 5 ~ "5-6",
+                            S2Q3_a >= 3 ~ "3-4",
+                            S2Q3_a >= 1 ~ "1-2",
+                            TRUE        ~ NA_character_)) %>% 
+  desc_table(vars = c(S1Q1_f, S2Q3_a), var_labs_df, groupby = "S2Q3_a")
+```
+
+
+# Rozložení dimenzí podle vlivu LEAFu
+
+## Dimenze 1
+
+Dimenze 1 je ekvivalentní otázce na vnímaný vliv LEAFu: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom.**
+
+```{r dimension1}
+leaf %>% 
+  count(dimension1) %>% 
+  ggplot(aes(x = dimension1, y = n)) +
+  geom_col() +
+  scale_x_continuous(breaks = seq(1, 6, 1)) +
+  theme_schola(axis.title = element_text()) +
+  labs(x = "Dimenze 1", y = "Počet respondentů")
+```
+
+## Dimenze 2
+
+Grafy tříděny podle výroku: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1=určite nie; 6=určite áno)**
+
+```{r dimension2}
+leaf %>% 
+  filter(!is.na(S2Q3_a)) %>% 
+  count(dimension2, S2Q3_a) %>%
+  group_by(S2Q3_a) %>% 
+  mutate(freq = n/sum(n),
+         freq = percent(freq, 1),
+         S2Q3_a = case_when(S2Q3_a == 1 ~ "1=určite nie",
+                            S2Q3_a == 6 ~ "6=určite áno",
+                            TRUE        ~ as.character(S2Q3_a))) %>% 
+  ggplot(aes(x = dimension2, y = n, label = freq)) +
+  geom_text(nudge_y = 2) +
+  geom_col() +
+  facet_wrap(~S2Q3_a) +
+  theme_schola(multiplot = TRUE)
+```
+
+## Dimenze 3
+
+Grafy tříděny podle výroku: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1=určite nie; 6=určite áno)**
+
+```{r dimension3}
+leaf %>% 
+  filter(!is.na(S2Q3_a)) %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a == 1 ~ "1=určite nie",
+                            S2Q3_a == 6 ~ "6=určite áno",
+                            TRUE        ~ as.character(S2Q3_a))) %>% 
+  ggplot(aes(x = dimension3)) +
+  geom_histogram(bins = 15, color = "white") +
+  facet_wrap(~S2Q3_a) +
+  theme_schola(multiplot = TRUE)
+```
+
+## Dimenze 4
+
+Grafy tříděny podle výroku: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1=určite nie; 6=určite áno)**
+
+```{r dimension4}
+leaf %>% 
+  filter(!is.na(S2Q3_a)) %>% 
+  count(dimension4, S2Q3_a) %>% 
+  group_by(S2Q3_a) %>% 
+  mutate(S2Q3_a = case_when(S2Q3_a == 1 ~ "1=určite nie",
+                            S2Q3_a == 6 ~ "6=určite áno",
+                            TRUE        ~ as.character(S2Q3_a)),
+         freq = n/sum(n),
+         freq = percent(freq, 1)) %>% 
+  ggplot(aes(x = dimension4, y = n, label = freq)) +
+  geom_col() +
+  scale_x_continuous(breaks = seq(0,10,2)) +
+  facet_wrap(~S2Q3_a) +
+  theme_schola(multiplot = TRUE)
+```
