@@ -243,3 +243,28 @@ Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej št
 ```{r other}
 social_per_program(S2Q1_other)
 ```
+
+\newpage
+
+# Vnímaný pozitivní vliv LEAFu podle programu
+
+Otázka: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1 = určite nie, 6 = určite áno)**
+
+V tabulce jsou řádková procenta
+
+```{r leaf-impact-program}
+leaf %>% 
+  select((contains("S4Q4") & !contains("comment") | S2Q3_a)) %>% 
+  pivot_longer(-S2Q3_a) %>% 
+  filter(value == "Áno") %>%
+  left_join(., var_labs_df, by = "name") %>% 
+    select(-c("value", "name")) %>% 
+  tbl_summary(by = S2Q3_a, percent = "row",
+              label = list(label ~ "Absolvovaný kurz")) %>% 
+  modify_header(label = "") %>%
+    modify_footnote(update = everything() ~ NA) %>%
+    bold_labels() %>%
+    as_flex_table() %>%
+    theme_booktabs() %>%
+    FitFlextableToPage()
+```
