@@ -1,0 +1,245 @@
+---
+title: "LEAF 2021 dotazníkové šetření"
+subtitle: "Přehled korelací"
+team: výzkumný tým SCHOLA EMPIRICA # delete whole entry if undesirable
+author:
+- "Aleš Vomáčka^[Kontaktní autor. E-mail: vomacka@scholaempirica.org]" # complex entry must be quoted
+- Martina Koutná
+- Marek Havrda # "and"/"a" is added automatically in selected locale
+date: "`r reschola::as_czech_date(Sys.time())`" # if Czech, use reschola::as_czech_date(Sys.time())
+output: 
+  reschola::schola_pdf:
+    num_format: cs # inline formatting for numbers (1 000,00 with "cs")
+    number_sections: true
+toc-title: "Obsah"
+abstract-title: Abstract
+lang: cs # smart-quotes and author variable depends on the lang variable
+logo: logos/schola # chars which are escaped by pandoc (i.e. "_") are prohibited
+logo_height: 20pt
+logo_client: false
+logo_client_height: 30pt
+head_height: false # may be used if fancyhdr complains 
+---
+
+```{r setup, include=FALSE}
+options(scipen = 10) # force R to show full numbers, not scientific notation
+
+library(reschola)
+library(tidyverse)
+library(scales)
+library(kableExtra)
+library(flextable)
+library(gtsummary)
+set_reschola_ggplot_fonts() # make ggplot2 use Roboto fonts without you having to set it
+theme_set(theme_schola()) # default ggplot theme
+source("98_custom_functions.R", encoding = "UTF-8")
+source("shared.R", local = TRUE, encoding = "UTF-8") # helper functions and shared code
+```
+
+```{r data}
+leaf <- read_rds("data-processed/leaf.rds")
+```
+
+```{r var-labels}
+# All of this is the preparation of the variable labels data frame
+# the data frame has to have two variables, "name" and "label" for desc_table() to function
+
+var_labs <- attr(leaf, "variable.labels")
+var_labs <- if_else(str_detect(var_labs, "\\]"), str_extract(var_labs, "(^.+)\\]"), var_labs)
+var_labs <- str_replace(var_labs, "\\[", "")
+var_labs <- str_replace(var_labs, "\\]", "")
+var_labs <- str_trim(var_labs)
+
+var_labs_df <- tibble(name  = names(leaf),
+                      label = var_labs)
+
+var_labs_df$label <- case_when(var_labs_df$name == "S4Q1" ~ "Pohlaví",
+                               var_labs_df$name == "S4Q2" ~ "Věk",
+                               var_labs_df$name == "S4Q3" ~ "Dosažené vzdělání",
+                               var_labs_df$name == "S4Q7" ~ "Ekonomický profil",
+                               var_labs_df$name == "S5Q2" ~ "Souhlasí s rozhovorem?",
+                               var_labs_df$name == "S2Q3_a" ~ "LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom\n(1 = určite nie, 6 = určite áno)",
+                               var_labs_df$name == "S5Q1_a" ~ "môj vplyv na spoločenské dianie\n(1 = veľmi veľký vplyv, 5 = nulový vplyv)",
+                               TRUE ~ var_labs_df$label)
+```
+
+# Postoje k současnostni a budoucnosti Slovenska podle programu
+
+```{r future}
+# quick and dirty function to generate results per absolved program
+future_per_program <- function(future_var) {
+leaf %>% 
+  mutate(across(starts_with("S1Q1"),
+                ~fct_relevel(., "neviem posúdiť")),
+         across(starts_with("S1Q1"),
+                ~fct_rev(.))) %>% 
+  select((contains("S4Q4") & !contains("comment") | {{ future_var }})) %>% 
+  pivot_longer(-{{ future_var }}) %>% 
+  filter(value == "Áno") %>%
+  left_join(., var_labs_df, by = "name") %>% 
+    select(-c("value", "name")) %>% 
+  tbl_summary(by = {{ future_var }}, percent = "row",
+              label = list(label ~ "Absolvovaný kurz")) %>% 
+  modify_header(label = "") %>%
+    modify_footnote(update = everything() ~ NA) %>%
+    bold_labels() %>%
+    as_flex_table() %>%
+    theme_booktabs() %>%
+    FitFlextableToPage()
+}
+```
+
+Otázka: *Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom.*
+
+V tabulkách jsou řádková procenta
+
+## Aktuálne nemá zmysel politicky sa angažovať na Slovensku.
+
+```{r future-a}
+future_per_program("S1Q1_a")
+```
+
+\newpage
+
+## Vyrušuje ma, keď sa ľudia občiansky neangažujú.
+
+```{r future-b}
+future_per_program("S1Q1_b")
+```
+
+\newpage
+
+## Úspech v dnešnom svete vyžaduje ťažké etické kompromisy.
+
+```{r future-c}
+future_per_program("S1Q1_c")
+```
+
+\newpage
+
+## Ak chce človek niečo zmeniť, je to najmä v jeho rukách.
+
+```{r future-d}
+future_per_program("S1Q1_d")
+```
+
+\newpage
+
+## Pre udržanie kvalitnej a dobre platenej práce musí byt človek flexibilný a pracovať i pre ľudí s neinšpiratívnymi hodnotami.
+
+```{r future-e}
+future_per_program("S1Q1_e")
+```
+
+\newpage
+
+## Najbližších 10 rokov je na Slovensku pre mňa cesta zarúbaná.
+
+```{r future-f}
+future_per_program("S1Q1_f")
+```
+
+\newpage
+
+# Vlivné sociální skupiny podle programu
+
+```{r social groups}
+# quick and dirty function to generate results per absolved program
+social_per_program <- function(social_var) {
+leaf %>% 
+  select((contains("S4Q4") & !contains("comment") | {{ social_var }})) %>% 
+  pivot_longer(-c( {{ social_var }} )) %>% 
+  filter(value == "Áno") %>%
+  left_join(., var_labs_df, by = "name") %>% 
+    select(-c("value", "name")) %>% 
+  group_by(label) %>% 
+  summarise(`průměr` = mean({{ social_var }}),
+            `průměr` = round(`průměr`),
+            `počet odpovědí` = n()) %>% 
+  rename("Organizace" = "label") %>% 
+  flextable() %>%
+  theme_booktabs() %>%
+  FitFlextableToPage() %>% 
+  footnote(j = 2,
+           part = "header",
+           value = as_paragraph("Stupnice od 0 do 100"))
+}
+```
+
+# rodičia, príbuzní
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r social-family}
+social_per_program(S2Q1_a)
+```
+
+\newpage
+
+## Priateľ(-ka), kamaráti, známi
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r friends}
+social_per_program(S2Q1_b)
+```
+
+\newpage
+
+## Učiteľ/učiteľka v škole, mentor
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r teachers}
+social_per_program(S2Q1_c)
+```
+
+\newpage
+
+## Nezisková organizácia, občianske združenie
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r nonprofit}
+social_per_program(S2Q1_d)
+```
+
+\newpage
+
+## Náboženská komunita a ľudia v nej
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r religion}
+social_per_program(S2Q1_e)
+```
+
+\newpage
+
+## Inšpiratívny človek, konkrétna osobnosť,  odborník(-čka
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r person}
+social_per_program(S2Q1_f)
+```
+
+\newpage
+
+## Voľnočasová komunita
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r hobby}
+social_per_program(S2Q1_g)
+```
+
+\newpage
+
+## Iné
+
+Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
+
+```{r other}
+social_per_program(S2Q1_other)
+```
