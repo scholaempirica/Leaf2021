@@ -30,6 +30,7 @@ library(scales)
 library(kableExtra)
 library(flextable)
 library(gtsummary)
+library(patchwork)
 set_reschola_ggplot_fonts() # make ggplot2 use Roboto fonts without you having to set it
 theme_set(theme_schola()) # default ggplot theme
 source("98_custom_functions.R", encoding = "UTF-8")
@@ -404,4 +405,98 @@ leaf %>%
   scale_x_continuous(breaks = seq(0,10,2)) +
   facet_wrap(~S2Q3_a) +
   theme_schola(multiplot = TRUE)
+```
+
+\newpage
+
+# Bodové grafy/matice dimenzí
+
+Každá kombinace dimenzí je zobrazena pouze jednou.
+
+## Dimeze 1 vůči ostatním dimenzím
+
+```{r d1d2, fig.cap= "Dimenze 1 a Dimenze 2"}
+leaf %>% 
+  ggplot(aes(x = dimension1, y = dimension2, group = dimension1)) +
+  geom_jitter(width = 0.2, height = 0) +
+  stat_summary(fun = mean,
+               geom = "crossbar",
+               mapping = aes(color = "Průměr skupiny")) +
+  scale_color_manual(values = "red") +
+  scale_x_continuous(breaks = 1:6) +
+  labs(x = "Dimenze 1", y = "Dimenze 2", color = element_blank()) +
+  theme_schola(axis.title = element_text()) +
+  theme(legend.position = "bottom")
+
+```
+
+```{r d1d3, fig.cap= "Dimenze 1 a Dimenze 3"}
+leaf %>% 
+  ggplot(aes(x = dimension1, y = dimension3, group = dimension1)) +
+  geom_jitter(width = 0.2, height = 0) +
+  stat_summary(fun = mean,
+               geom = "crossbar",
+               mapping = aes(color = "Průměr skupiny")) +
+  scale_color_manual(values = "red") +
+  scale_x_continuous(breaks = 1:6) +
+  labs(x = "Dimenze 1", y = "Dimenze 3", color = element_blank()) +
+  theme_schola(axis.title = element_text()) +
+  theme(legend.position = "bottom")
+```
+
+```{r d1d4, fig.cap= "Dimenze 1 a Dimenze 4"}
+leaf %>% 
+  ggplot(aes(x = dimension1, y = dimension4, group = dimension1)) +
+  geom_jitter(width = 0.2, height = 0) +
+  stat_summary(fun = mean,
+               geom = "crossbar",
+               mapping = aes(color = "Průměr skupiny")) +
+  scale_color_manual(values = "red") +
+  scale_x_continuous(breaks = 1:6) +
+  labs(x = "Dimenze 1", y = "Dimenze 4", color = element_blank()) +
+  theme_schola(axis.title = element_text()) +
+  theme(legend.position = "bottom")
+```
+
+\newpage
+
+## Dimenze 2 vůči ostatním dimenzím
+
+```{r d2d3, fig.cap="Dimenze 2 a Dimenze 3"}
+leaf %>% 
+  ggplot(aes(x = dimension2, y = dimension3, group = dimension2)) +
+  geom_jitter(width = 0.2, height = 0) +
+  stat_summary(fun = mean,
+               geom = "crossbar",
+               mapping = aes(color = "Průměr skupiny")) +
+  scale_color_manual(values = "red") +
+  scale_x_continuous(breaks = 1:6) +
+  labs(x = "Dimenze 2", y = "Dimenze 3", color = element_blank()) +
+  theme_schola(axis.title = element_text()) +
+  theme(legend.position = "bottom")
+```
+
+```{r d2d4, fig.cap="Dimenze 2 a Dimenze 4"}
+leaf %>% 
+  ggplot(aes(x = dimension2, y = dimension4, group = dimension2)) +
+  geom_jitter(width = 0.2, height = 0) +
+  stat_summary(fun = mean,
+               geom = "crossbar",
+               mapping = aes(color = "Průměr skupiny")) +
+  scale_color_manual(values = "red") +
+  scale_x_continuous(breaks = 1:6) +
+  labs(x = "Dimenze 2", y = "Dimenze 4", color = element_blank()) +
+  theme_schola(axis.title = element_text()) +
+  theme(legend.position = "bottom")
+```
+
+## Dimenze 3 vůči ostatním
+
+```{r d3d4, fig.cap="Dimenze 3 a Dimenze 4"}
+leaf %>% 
+  ggplot(aes(x = dimension3, y = dimension4, group = dimension3)) +
+  geom_count() +
+  labs(x = "Dimenze 3", y = "Dimenze 4", size = "Počet respondentů") +
+  theme_schola(axis.title = element_text()) +
+  theme(legend.position = "bottom")
 ```
