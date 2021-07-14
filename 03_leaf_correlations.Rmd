@@ -506,16 +506,12 @@ leaf %>%
 
 Otázka na přítomnost / budoucnost Slovenska: **Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom. (škála vôbec nesúhlasím - určite súhlasím).**
 
-\newline
 
 Otázka na přínos LEAFu: **Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života? (škála vôbec - zásadne).**
 
-\newline
-
 Korelace měřena pomocí Kendallova tau (0 = žádná korelace, 1 = dokonalá přímá úměra, -1 = dokonalá nepřímá úměra).
 
-
-```{r}
+```{r impact-future-corr}
 cor_df <- leaf %>% 
             select(starts_with("S2Q5") | starts_with("S1Q1")) %>% 
             mutate(across(.cols = starts_with("S2Q5"),
@@ -556,4 +552,80 @@ cor_df %>%
                     var2 = "Přínos LEAFu",
                     corr = "Kendall tau") %>% 
   fontsize(j = 3, size = 8)
+```
+
+\newpage
+
+# Korelace mezi vnímaným vlivem LEAFu a aktivitami za poslední 2 roky
+
+Otázka na přítomnost / budoucnost Slovenska: **Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom. (škála vôbec nesúhlasím - určite súhlasím).**
+
+Otázka na aktivity za poslední 2 roky: **Čomu z nasledujúcich aktivít sa za posledný rok-dva systematicky venuješ? ( škála nie - áno)**
+
+Korelace měřena pomocí Kendallova tau (0 = žádná korelace, 1 = dokonalá přímá úměra, -1 = dokonalá nepřímá úměra).
+
+```{r impact-activities-corr}
+cor_df <- leaf %>% 
+            select(starts_with("S3Q1") | starts_with("S1Q1")) %>% 
+            mutate(across(.cols = starts_with("S3Q1"),
+                          .fns  = ~na_if(., "netýka sa ma")),
+                   across(.cols = starts_with("S3Q1"),
+                          .fns  = ~fct_relevel(., "nie", "áno")),
+                   across(.cols = starts_with("S1Q1"),
+                          .fns  = ~na_if(.,"neviem posúdiť")),
+                   across(.cols = everything(),
+                          .fns  = droplevels),
+                   across(.cols = everything(),
+                          .fns  = as.numeric))
+
+cor_matrix <-  round( cor(cor_df, method = "kendall", use = "complete.obs"),2 )
+
+cor_df <-  as.data.frame(cor_matrix)
+
+cor_df <- rownames_to_column(cor_df, var = "var1")
+cor_df <- pivot_longer(cor_df,
+                       cols = -var1,
+                       names_to = "var2",
+                       values_to = "corr")
+cor_df %>% 
+  filter(str_detect(var1, "S1Q1") & !str_detect(var2, "S1Q1")) %>% 
+  rename("name" = "var1") %>% 
+  left_join(., var_labs_df, by = "name") %>% 
+  select(-name) %>% 
+  rename("name" = "var2",
+         "var1" = "label") %>% 
+  left_join(., var_labs_df, by = "name") %>% 
+  select(-name) %>% 
+  rename("var2" = "label") %>% 
+  relocate(corr, .after = last_col()) %>% 
+  flextable() %>% 
+  theme_booktabs() %>% 
+  FitFlextableToPage() %>% 
+  width(j = 1, 2) %>% 
+  width(j = 2, 2) %>% 
+  set_header_labels(var1 = "Aktivita za poslední 2 roky",
+                    var2 = "Přínos LEAFu",
+                    corr = "Kendall tau") %>% 
+  fontsize(j = 3, size = 8)
+```
+
+\newpage
+
+# Vliv LEAFu a osobní vliv na veřejné dění
+
+Znění Otázky na vliv LEAFu na životní cestu: **LEAF ovplyvnil moju životnú cestu zásadným pozitívnym spôsobom (1 = určite nie, 6 = určite áno)**
+
+Znění otázky na osobní vliv na společenské dění: **Ako hodnotíš svoj celkový vplyv na spoločenské dianie okolo seba, ktorý máš zo svojej pozície? (1 = veľmi veľký vplyv, nulový vplyv)**
+
+```{r impact-influnce-cor}
+tbl_cross(leaf, row = S5Q1_a, col = S2Q3_a,
+          label = list(S2Q3_a = "vplyv LEAF na životnú cestu",
+                       S5Q1_a = "Vplyv na spoločenské dianie"),
+          percent = "row",
+          missing = "no",
+          margin = NULL) %>% 
+  modify_header(label = "") %>% 
+  as_flex_table() %>% 
+  theme_booktabs() %>% 
+  FitFlextableToPage()
 ```
