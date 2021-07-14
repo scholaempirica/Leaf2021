@@ -167,7 +167,7 @@ leaf %>%
 }
 ```
 
-# rodičia, príbuzní
+## rodičia, príbuzní
 
 Otázka: **Nakoľko dôležité boli pri rozhodovaní sa o smerovaní tvojej študijnej / pracovnej* dráhy nasledujúci ľudia či komunity, ktorými si bol(a) obklopený(-á)?**
 
@@ -499,4 +499,61 @@ leaf %>%
   labs(x = "Dimenze 3", y = "Dimenze 4", size = "Počet respondentů") +
   theme_schola(axis.title = element_text()) +
   theme(legend.position = "bottom")
+```
+
+
+# Korelace mezi vnímaným vlivem LEAFu a současnosti/budoucnosti Slovenska
+
+Otázka na přítomnost / budoucnost Slovenska: **Na úvod, priblížme si realitu, v ktorej žijeme. Zaujíma nás tvoje osobné stanovisko k nasledovným výrokom. (škála vôbec nesúhlasím - určite súhlasím).**
+
+\newline
+
+Otázka na přínos LEAFu: **Čo myslíš, do akej miery ti LEAF pomohol v nasledujúcich oblastiach osobného alebo profesijného života? (škála vôbec - zásadne).**
+
+\newline
+
+Korelace měřena pomocí Kendallova tau (0 = žádná korelace, 1 = dokonalá přímá úměra, -1 = dokonalá nepřímá úměra).
+
+
+```{r}
+cor_df <- leaf %>% 
+            select(starts_with("S2Q5") | starts_with("S1Q1")) %>% 
+            mutate(across(.cols = starts_with("S2Q5"),
+                          .fns  = ~na_if(., "netýka sa ma")),
+                   across(.cols = starts_with("S1Q1"),
+                          .fns  = ~na_if(.,"neviem posúdiť")),
+                   across(.cols = everything(),
+                          .fns  = droplevels),
+                   across(.cols = everything(),
+                          .fns  = as.numeric))
+
+cor_matrix <-  round( cor(cor_df, method = "kendall", use = "complete.obs"),2 )
+
+cor_df <-  as.data.frame(cor_matrix)
+
+cor_df <- rownames_to_column(cor_df, var = "var1")
+cor_df <- pivot_longer(cor_df,
+                       cols = -var1,
+                       names_to = "var2",
+                       values_to = "corr")
+cor_df %>% 
+  filter(str_detect(var1, "S1Q1") & !str_detect(var2, "S1Q1")) %>% 
+  rename("name" = "var1") %>% 
+  left_join(., var_labs_df, by = "name") %>% 
+  select(-name) %>% 
+  rename("name" = "var2",
+         "var1" = "label") %>% 
+  left_join(., var_labs_df, by = "name") %>% 
+  select(-name) %>% 
+  rename("var2" = "label") %>% 
+  relocate(corr, .after = last_col()) %>% 
+  flextable() %>% 
+  theme_booktabs() %>% 
+  FitFlextableToPage() %>% 
+  width(j = 1, 2) %>% 
+  width(j = 2, 2) %>% 
+  set_header_labels(var1 = "Současnost / budoucnost Slovenska",
+                    var2 = "Přínos LEAFu",
+                    corr = "Kendall tau") %>% 
+  fontsize(j = 3, size = 8)
 ```
